@@ -1,4 +1,4 @@
-QT += quick
+QT += gui quick core5compat qml
 QT += network
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -7,16 +7,17 @@ QT += network
 
 SOURCES += \
         Backend/AuthHandler/authhandler.cpp \
-        Backend/main.cpp \
+        Backend/core/ComponentCreatorEngine.cpp \
+        Backend/core/FileWatcher.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
+QML_IMPORT_PATH = $$PWD/../../../Qt/6.3.1/mingw_64/qml/Component
 
 # Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH =
+QML_DESIGNER_IMPORT_PATH = $$PWD/../../../Qt/6.3.1/mingw_64/qml/Component
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -24,4 +25,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    Backend/AuthHandler/authhandler.h
+    Backend/AuthHandler/authhandler.h \
+    Backend/core/ComponentCreatorEngine.h \
+    Backend/core/FileWatcher.h

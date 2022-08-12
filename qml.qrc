@@ -3,5 +3,16 @@
         <file>UI/main.qml</file>
         <file>UI/assets/images/back.png</file>
         <file>UI/assets/icons/group.ico</file>
+        <file>UI/LoginScreen.qml</file>
+        <file>UI/splashScreen.qml</file>
+        <file>UI/assets/images/hcl_logo.png</file>
+        <file>UI/components/CircularProgressBar.qml</file>
+        <file>UI/components/CustomButton.qml</file>
+        <file>UI/components/CustomTextField.qml</file>
+        <file>UI/components/ModalPopup.qml</file>
+        <file>UI/MainScreen.qml</file>
+        <file>UI/assets/images/hcl_logo_bluepng.png</file>
+        <file>UI/LeftSideBar.qml</file>
+        <file>UI/MainWindow.qml</file>
     </qresource>
 </RCC>
