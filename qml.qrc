@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>UI/main.qml</file>
+        <file>UI/assets/images/back.png</file>
+        <file>UI/assets/icons/group.ico</file>
+    </qresource>
+</RCC>
