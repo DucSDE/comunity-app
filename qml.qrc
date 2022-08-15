@@ -14,5 +14,21 @@
         <file>UI/assets/images/hcl_logo_bluepng.png</file>
         <file>UI/LeftSideBar.qml</file>
         <file>UI/MainWindow.qml</file>
+        <file>UI/components/ToggleButton.qml</file>
+        <file>UI/components/LeftMenuBtn.qml</file>
+        <file>UI/components/TopBarButton.qml</file>
+        <file>UI/assets/images/cil-save.png</file>
+        <file>UI/assets/images/cil-settings.png</file>
+        <file>UI/assets/images/menu.png</file>
+        <file>UI/assets/images/cil-folder-open.png</file>
+        <file>UI/assets/images/cil-home.png</file>
+        <file>UI/assets/images/cil-terminal.png</file>
+        <file>UI/assets/images/cil-fullscreen.png</file>
+        <file>UI/assets/images/cil-x.png</file>
+        <file>UI/assets/images/cil-fullscreen-exit.png</file>
+        <file>UI/pages/ChatPage.qml</file>
+        <file>UI/pages/HomePage.qml</file>
+        <file>UI/pages/ExplorePage.qml</file>
+        <file>UI/pages/SettingPage.qml</file>
     </qresource>
 </RCC>

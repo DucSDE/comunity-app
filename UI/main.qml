@@ -7,16 +7,18 @@ Window {
     id: window
     width: 1080
     height: 680
-    minimumWidth: 380
+    minimumWidth: 800
     minimumHeight: 680
     visible: true
-    visibility: Window.Maximized
-    color: "transparent"
+    color: "#00000000"
     title: "HCL Training Community Application v1.0.0"
+
+
+    // Remove title bar
+    flags: Qt.SplashScreen | Qt.FramelessWindowHint
 
     Component.onCompleted: {
         flags: ~Qt.SplashScreen | ~Qt.FramelessWindowHint
-        flags: Qt.Window | Qt.WindowStaysOnTopHint
     }
 
     Loader{

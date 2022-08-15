@@ -15,7 +15,7 @@ Window {
     color: "#00000000"
 
     // Remove Title Bar
-        flags: Qt.WindowStaysOnTopHint | Qt.SplashScreen | Qt.FramelessWindowHint
+    flags: Qt.WindowStaysOnTopHint | Qt.SplashScreen | Qt.FramelessWindowHint
 
     // Internal Functions
     QtObject{
@@ -200,7 +200,7 @@ Window {
             colorDefault: "#2aafd3"
             onClicked: {
                 timer.start();
-//                internal.checkLogin(textUsername.text, textPassword.text)
+//                                internal.checkLogin(textUsername.text, textPassword.text)
             }
         }
 
@@ -211,7 +211,6 @@ Window {
                 timer.start();
             }
             function onSignInError() {
-
                 internal.openPopup(internal.getStatusCode());
             }
         }

@@ -15,10 +15,11 @@ RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH = $$PWD/../../../Qt/6.3.1/mingw_64/qml/Component
+QML_IMPORT_PATH += $$PWD/../../../Qt/6.3.1/mingw_64/qml/QtQuick/Dialogs
 
 # Additional import path used to resolve QML modules just for Qt Quick Designer
 QML_DESIGNER_IMPORT_PATH = $$PWD/../../../Qt/6.3.1/mingw_64/qml/Component
-
+QML_DESIGNER_IMPORT_PATH += $$PWD/../../../Qt/6.3.1/mingw_64/qml/QtQuick/Dialogs
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

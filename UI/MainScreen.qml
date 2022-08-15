@@ -9,9 +9,8 @@ import "components"
 Rectangle {
     id: content
     color: "transparent"
-    LeftSideBar {
-        id: leftSideBar
-    }
+    clip: true
+    anchors.fill: parent
 
     Rectangle {
         id: bottomNavigationBar
@@ -20,7 +19,7 @@ Rectangle {
         color: "orange"
         anchors {
             bottom: parent.bottom
-            left: leftSideBar.right
+            left: parent.left
             right: parent.right
         }
     }
