@@ -80,7 +80,7 @@ Rectangle {
 
         Rectangle {
             id: messagePanel
-
+            width: content.width - ( messageListPanel.width + detailMessagePanel.width )
             color: "#af5f3d"
             border.width: 0
             anchors.right: detailMessagePanel.left
@@ -92,15 +92,34 @@ Rectangle {
                 top: parent.top
             }
 
-            ToggleButton {
-                id: openDetail
-                anchors {
-                    right: parent.right
-                    top: parent.top
-                    margins: 24
+            Text{
+                id: defaultMessage
+                text: "Start new message with your friend with click on their avatar ^-^"
+                width: messagePanel.width
+                font.bold: true
+                font.family: "UTM Avo"
+                font.pointSize: 12
+                anchors.centerIn: parent
+                wrapMode: Text.WordWrap
+                visible: true
+            }
+
+            Rectangle {
+                id: onMessageReading
+
+                anchors.fill: parent
+                visible: defaultMessage.visible ? false : true
+
+                ToggleButton {
+                    id: openDetail
+                    anchors {
+                        right: parent.right
+                        top: parent.top
+                        margins: 24
+                    }
+                    onClicked: animationDetai.start()
+                    clip: true
                 }
-                onClicked: animationDetai.start()
-                clip: true
             }
 
         }
@@ -129,7 +148,6 @@ Rectangle {
             anchors.bottom: parent.bottom
             anchors.topMargin: 0
             anchors.bottomMargin: 0
-            visible: true
             color: "#45e972"
             border.width: 0
         }
@@ -159,8 +177,7 @@ Rectangle {
                         sourceSize.width:  35
                         sourceSize.height: 35
 
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: imageArea.verticalCenter
                         source: "qrc:/UI/assets/images/hcl_logo_bluepng.png"
                     }
 

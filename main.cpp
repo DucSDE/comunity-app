@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     app.setWindowIcon(QIcon(":/UI/assets/images/hcl_logo.png"));
 
     QString API_KEY = QString(qgetenv("API_KEY"));
-    qDebug() << API_KEY;
+    qDebug() << "API_KEY:" << API_KEY;
 
     ComponentCreatorEngine engine;
     engine.addImportPath("D:/Qt/6.3.1/mingw_64/qml/Component");
@@ -34,11 +34,13 @@ int main(int argc, char *argv[])
     AuthHandler authHandler;
     authHandler.setAPIKey(API_KEY);
 
+
+
     QQmlContext *rootContext = engine.rootContext();
     rootContext->setContextProperty("QmlEngine", &engine);
     rootContext->setContextProperty("_authHandler", &authHandler);
 
-    const QUrl url(qgetenv("MAIN_QML"));
+    const QUrl url(qgetenv("DEPLOY_QML"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)

@@ -199,8 +199,8 @@ Window {
             colorMouseOver: "#3cdabf"
             colorDefault: "#2aafd3"
             onClicked: {
-                timer.start();
-//                                internal.checkLogin(textUsername.text, textPassword.text)
+//                timer.start();
+                                internal.checkLogin(textUsername.text, textPassword.text)
             }
         }
 

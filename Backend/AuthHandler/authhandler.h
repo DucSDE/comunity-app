@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QMetaObject>
 #include <QMetaEnum>
 
@@ -44,6 +45,8 @@ public slots:
     void readDatabase();
     void errorHandle();
     void successHandle();
+    void testCloudFireStore();
+    void getAllUser();
 
 signals:
     void signedInSuccess();
