@@ -7,6 +7,7 @@
 
 #include "Backend/core/ComponentCreatorEngine.h"
 #include "Backend/AuthHandler/authhandler.h"
+#include "Backend/FireStoreHandler/FireStoreHandler.h"
 
 int main(int argc, char *argv[])
 {
@@ -34,11 +35,15 @@ int main(int argc, char *argv[])
     AuthHandler authHandler;
     authHandler.setAPIKey(API_KEY);
 
+    FireStoreHandler fireStore;
+    fireStore.printUser();
 
+//    QObject::connect(&fireStore, &FireStoreHandler::userLogout, &authHandler, &AuthHandler::userLogout);
 
     QQmlContext *rootContext = engine.rootContext();
     rootContext->setContextProperty("QmlEngine", &engine);
     rootContext->setContextProperty("_authHandler", &authHandler);
+    rootContext->setContextProperty("_fireStore", &fireStore);
 
     const QUrl url(qgetenv("DEPLOY_QML"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

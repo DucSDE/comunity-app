@@ -7,10 +7,10 @@ AuthHandler::AuthHandler(QObject *parent)
 {
     m_networkAccessManager = new QNetworkAccessManager( this );
 
-        connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::successHandle );
-//    connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::readDatabase );
-        connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::testCloudFireStore );
-//        connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::getAllUser );
+    connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::getUserDetail );
+
+//    connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::getAllUser );
+    //    connect(this, &AuthHandler::signedInSuccess, this, &AuthHandler::readDatabase );
 }
 
 AuthHandler::~AuthHandler()
@@ -23,6 +23,19 @@ void AuthHandler::setAPIKey(const QString &newAPIKey)
     if(m_apiKey == newAPIKey)
         return;
     m_apiKey = newAPIKey;
+}
+
+void AuthHandler::signIn(const QString &email, const QString &password)
+{
+    QString signInEndPoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + m_apiKey;
+    QVariantMap payLoadVariantMap;
+    payLoadVariantMap["email"] = email;
+    payLoadVariantMap["password"] = password;
+    payLoadVariantMap["returnSecureToken"] = true;
+
+    QJsonDocument jsonPayLoad = QJsonDocument::fromVariant(payLoadVariantMap);
+
+    post( signInEndPoint, jsonPayLoad );
 }
 
 void AuthHandler::signUp(const QString &email, const QString &password)
@@ -38,6 +51,8 @@ void AuthHandler::signUp(const QString &email, const QString &password)
     post( signUpEndPoint, jsonPayLoad );
 }
 
+
+// Q_INVOKABLE function
 bool AuthHandler::login(const QString &email, const QString &password)
 {
     signIn( email, password );
@@ -56,6 +71,9 @@ QString AuthHandler::getErrorMessage()
     return errorMessage();
 }
 
+// END Q_INVOKABLE function
+
+// GETTER SETTER Message and UID
 const QString &AuthHandler::uid() const
 {
     return m_uid;
@@ -64,19 +82,6 @@ const QString &AuthHandler::uid() const
 void AuthHandler::setUid(const QString &newUid)
 {
     m_uid = newUid;
-}
-
-void AuthHandler::signIn(const QString &email, const QString &password)
-{
-    QString signInEndPoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + m_apiKey;
-    QVariantMap payLoadVariantMap;
-    payLoadVariantMap["email"] = email;
-    payLoadVariantMap["password"] = password;
-    payLoadVariantMap["returnSecureToken"] = true;
-
-    QJsonDocument jsonPayLoad = QJsonDocument::fromVariant(payLoadVariantMap);
-
-    post( signInEndPoint, jsonPayLoad );
 }
 
 void AuthHandler::setErrorMessage(const QString &newErrorMessage)
@@ -90,13 +95,20 @@ QString AuthHandler::errorMessage()
 {
     return m_errorMessage;
 }
+//END GETTER SETTER Message and UID
 
 void AuthHandler::networkReplyReadyRead()
 {
     QByteArray respone = m_networkReply->readAll();
     m_networkReply -> deleteLater ();
-    //    qDebug() <<"in ready read: \n"<< QJsonDocument::fromJson(respone);
     parseRespone ( respone );
+}
+
+void AuthHandler::networkReplyReadyReadData()
+{
+    QByteArray respone = m_networkReply->readAll();
+    m_networkReply -> deleteLater ();
+    parseResponeData ( respone );
 }
 
 void AuthHandler::readDatabase()
@@ -104,15 +116,24 @@ void AuthHandler::readDatabase()
     qDebug() << "connect readDatabase slot";
     QString dataEndPoint = "https://comunitybackend-default-rtdb.asia-southeast1.firebasedatabase.app/Users.json?auth=" + m_idToken;
     m_networkReply = m_networkAccessManager->get ( QNetworkRequest(QUrl(dataEndPoint)));
-    connect( m_networkReply, &QNetworkReply::readyRead, this, &AuthHandler::networkReplyReadyRead );
+    connect( m_networkReply, &QNetworkReply::readyRead, this, &AuthHandler::networkReplyReadyReadData );
 }
 
+//PRIVATE FUNCTION
 void AuthHandler::post(const QString &url, const QJsonDocument &payLoad)
 {
     QNetworkRequest newRequest ( ( QUrl (url) ) );
     newRequest.setHeader( QNetworkRequest::ContentTypeHeader, QString("application/json") );
     m_networkReply = m_networkAccessManager->post ( newRequest, payLoad.toJson() );
     connect( m_networkReply, &QNetworkReply::readyRead, this, &AuthHandler::networkReplyReadyRead );
+}
+
+void AuthHandler::get(const QString &url)
+{
+    QNetworkRequest newRequest ( ( QUrl (url) ) );
+    newRequest.setHeader( QNetworkRequest::ContentTypeHeader, QString("application/json") );
+    m_networkReply = m_networkAccessManager->get ( newRequest);
+    connect( m_networkReply, &QNetworkReply::readyRead, this, &AuthHandler::networkReplyReadyReadData );
 }
 
 void AuthHandler::parseRespone(const QByteArray &respone)
@@ -124,44 +145,88 @@ void AuthHandler::parseRespone(const QByteArray &respone)
     if(isObject){
         qDebug() <<"Receive data is an object" ;
         QJsonObject responeObject = responeJsonDoc.object();
-        if( responeObject.contains("kind")){
-            //sign in success
-            qDebug() <<"Receive data is signin/signup signal" ;
-            handleResponeSuccess(responeObject);
-        }
-        else if ( responeObject.contains("error")) {
-            QJsonObject errorObject = responeObject["error"].toObject();
-            handleResponeError(errorObject);
-        }
-
-        if (responeObject.contains("documents")) {
-            qDebug() << "data respone is a documents" ;
-            qDebug() << "receive data get from all user" ;
-            qDebug() << "Retrive data from firestore: \n" << QJsonDocument::fromJson(respone);
-        }
-        if(responeObject.contains("name")){
-            qDebug() << "receive data get specify user id:" ;
-            qDebug() << "Retrive data from firestore: \n" << QJsonDocument::fromJson(respone);
-        }
-
+        parseJsonObject(responeObject);
     }
     //when respone data is an array
-    else {
-        bool isArray = responeJsonDoc.isArray();
-        if(isArray){
-            qDebug() <<"Receive data is an array" ;
-            QJsonArray responeArray = responeJsonDoc.array();
-            qDebug() <<"Receive data from realtime database with user.json and auth key with idToken" ;
-            qDebug() << "Receive data from in slot readDatabase: \n" << responeArray;
-        }
-        //data receive id null
-        else {
-            qDebug() <<"Receive null data / check query " ;
-        }
+
+}
+
+void AuthHandler::parseJsonObject(const QJsonObject &object)
+{
+    if( object.contains("kind")){
+        //sign in or sign up success
+        handleResponeSuccess(object);
+        return;
+    }
+    if ( object.contains("error")) {
+        QJsonObject errorObject = object["error"].toObject();
+        handleResponeError(errorObject);
+        return;
     }
 }
 
-void AuthHandler::handleResponeSuccess(QJsonObject &resObj)
+void AuthHandler::parseResponeData(const QByteArray &respone)
+{
+    connect(this, &AuthHandler::getUserSuccess, &fireStore, &FireStoreHandler::setUser );
+    QJsonDocument responeJsonDoc = QJsonDocument::fromJson( respone );
+    bool isEmpty = responeJsonDoc.isEmpty();
+    bool isNull = responeJsonDoc.isNull();
+    if(isEmpty || isNull)
+    {
+        qDebug() << "data respone is empty" ;
+        if (isNull){
+            qDebug() <<"Receive null data / check query " ;
+        }
+        return;
+    }
+    else {
+        //else data get success
+        bool isObject = responeJsonDoc.isObject();
+        bool isArray = responeJsonDoc.isArray();
+
+        if(isObject){
+            QJsonObject responeDataObject = responeJsonDoc.object();
+            if (responeDataObject.contains("documents")) {
+                //get all document of collection
+                qDebug() << "data respone is a documents" ;
+                qDebug() << "receive data get from all user" ;
+                qDebug() << "Retrive data from firestore: \n" << responeDataObject;
+                return;
+            }
+            if(responeDataObject.contains("name") && responeDataObject.contains("fields")){
+                //get user info
+                qDebug() << "receive data get specify user id:" ;
+                QJsonObject fields = responeDataObject["fields"].toObject();
+                qDebug() << "Retrive data from firestore fields \n";
+                QList<QString> groups;
+                QJsonArray jsonArray = fields["groups"].toObject().value("arrayValue").toObject().value("values").toArray();
+                for(int i = 0; i < jsonArray.size(); i ++){
+                    groups.append(jsonArray[i].toObject().value("stringValue").toString());
+                }
+
+                m_user.setDisplayName(fields["displayName"].toObject().value("stringValue").toString());
+                m_user.setDoB(fields["dob"].toObject().value("timestampValue").toString());
+                m_user.setLastOnline(fields["lastOnline"].toObject().value("stringValue").toString());
+                m_user.setPhotoURL(fields["photoURL"].toObject().value("stringValue").toString());
+                m_user.setGroups(groups);
+                emit getUserSuccess(m_user);
+                return;
+            }
+        }
+
+        if(isArray){
+            qDebug() <<"Receive data is an array" ;
+            QJsonArray responeDataArray = responeJsonDoc.array();
+            qDebug() <<"Receive data from realtime database with user.json and auth key with idToken" ;
+            qDebug() << "Receive data from in slot readDatabase: \n" << responeDataArray;
+        }
+    }
+
+
+
+}
+
+void AuthHandler::handleResponeSuccess(const QJsonObject &resObj)
 {
     qDebug()<<"In Sign In / Sign Up Success";
     QString idToken = resObj["idToken"].toString();
@@ -170,16 +235,27 @@ void AuthHandler::handleResponeSuccess(QJsonObject &resObj)
     {
         qDebug() << "Sign In Success" ;
         m_responeStatus = "OK";
-        emit signedInSuccess();
+        QString UID = resObj["localId"].toString();
+        QString displayName = resObj["displayName"].toString();
+        QString email = resObj["email"].toString();
+        QString photoURL = resObj["photoURL"].toString();
+        QString dob = resObj["dob"].toString();
+        QList<QString> groups((QList<QString>()));
+        QString lastOnline = resObj["lastOnline"].toString();
+        const User userLogin(UID,displayName, email, photoURL, dob, groups, lastOnline);
+        m_user = userLogin;
+
+        emit signedInSuccess(m_user);
     }
     else {
         qDebug() << "Sign Up Success" ;
         m_responeStatus = "OK";
-        emit signedUpSuccess();
+        const User newUserSignUp;
+        emit signedUpSuccess(newUserSignUp);
     }
 }
 
-void AuthHandler::handleResponeError(QJsonObject &errorObject)
+void AuthHandler::handleResponeError(const QJsonObject &errorObject)
 {
     connect(this, &AuthHandler::signInError, this, &AuthHandler::errorHandle );
 
@@ -196,41 +272,41 @@ void AuthHandler::handleResponeError(QJsonObject &errorObject)
     case EMAIL_EXISTS:
     {
         //            qDebug() << "SIGN UP WITH EXISTS EMAIL, NOTIFY TO USER TO TRY ANOTHER EMAIL" ;
-        emit signUpError();
+        emit signUpError(message);
         break;
     }
 
     case OPERATION_NOT_ALLOWED:
     {
         //            qDebug() << "LOGIN EMAIL&PASSWORD DISABLE" ;
-        emit signUpError();
+        emit signUpError(message);
         break;
     }
 
     case TOO_MANY_ATTEMPTS_TRY_LATER:
     {
         //            qDebug() << "TOO MANY REQUEST OCCURED" ;
-        emit signUpError();
+        emit signUpError(message);
         break;
     }
 
     case EMAIL_NOT_FOUND:
     {
         //            qDebug() << "CAN NOT FIND THE EMAIL OF USER IN DATABASE" ;
-        emit signInError();
+        emit signInError(message);
         break;
     }
 
     case INVALID_PASSWORD:
     {
         //            qDebug() << "USER ENTER WRONG PASSWORD" ;
-        emit signInError();
+        emit signInError(message);
         break;
     }
     case USER_DISABLED:
     {
         //            qDebug() << "YOUR ACCOUNT HAS BEEN DISABLE BY ADMIN" ;
-        emit signInError();
+        emit signInError(message);
         break;
     }
 
@@ -239,6 +315,10 @@ void AuthHandler::handleResponeError(QJsonObject &errorObject)
     }
 }
 
+
+//END PRIVATE FUNCTION
+
+//PUBLIC FUNTION
 void AuthHandler::errorHandle()
 {
     std::string responeMessage = m_responeStatus.toStdString();
@@ -292,29 +372,31 @@ void AuthHandler::errorHandle()
     }
 }
 
-void AuthHandler::successHandle()
+void AuthHandler::successLogin(const User &userLogin)
 {
+    Q_UNUSED(userLogin);
     qDebug() << "auth.cpp:/ current code:" << m_responeStatus;
-    //    qDebug() << "auth.cpp:/ user id token:" << m_idToken;
 }
 
-void AuthHandler::testCloudFireStore()
+void AuthHandler::userLogout(User &userLogout)
+{
+    Q_UNUSED(userLogout);
+    m_user = User();
+}
+
+void AuthHandler::getUserDetail()
 {
     qDebug() << "connect get specify user id";
-    QString dataEndPoint = "https://firestore.googleapis.com/v1/projects/comunitybackend/databases/(default)/documents/user_info/PaKmpsO2wXRtHxfynCbZb5Q5GOB2";
-    QNetworkRequest newRequest ( (QUrl(dataEndPoint)) ) ;
-    newRequest.setHeader( QNetworkRequest::ContentTypeHeader, QString("application/json") );
-    m_networkReply = m_networkAccessManager->get ( newRequest );
-    connect( m_networkReply, &QNetworkReply::readyRead, this, &AuthHandler::networkReplyReadyRead );
+    QString dataEndPoint = "https://firestore.googleapis.com/v1/projects/comunitybackend/databases/(default)/documents/user_info/" + m_user.UID();
+    get ( dataEndPoint );
 }
 
 void AuthHandler::getAllUser()
 {
     qDebug() << "connect get ALL user slot";
     QString dataEndPoint = "https://firestore.googleapis.com/v1/projects/comunitybackend/databases/(default)/documents/user_info/";
-    QNetworkRequest newRequest ( (QUrl(dataEndPoint)) ) ;
-    newRequest.setHeader( QNetworkRequest::ContentTypeHeader, QString("application/json") );
-    m_networkReply = m_networkAccessManager->get ( newRequest );
-    connect( m_networkReply, &QNetworkReply::readyRead, this, &AuthHandler::networkReplyReadyRead );
+    get ( dataEndPoint );
+
 }
 
+//END PUBLIC FUNTION

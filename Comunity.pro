@@ -7,6 +7,9 @@ QT += network
 
 SOURCES += \
         Backend/AuthHandler/authhandler.cpp \
+        Backend/FireStoreHandler/FireStoreHandler.cpp \
+        Backend/FireStoreHandler/LoadMessageHelper.cpp \
+        Backend/Model/User.cpp \
         Backend/core/ComponentCreatorEngine.cpp \
         Backend/core/FileWatcher.cpp \
         main.cpp
@@ -27,5 +30,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     Backend/AuthHandler/authhandler.h \
+    Backend/FireStoreHandler/FireStoreHandler.h \
+    Backend/FireStoreHandler/LoadMessageHelper.h \
+    Backend/Model/User.h \
     Backend/core/ComponentCreatorEngine.h \
     Backend/core/FileWatcher.h

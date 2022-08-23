@@ -155,18 +155,19 @@ Rectangle {
         Component {
             id: chatDelegate
 
-            Row {
+            Item {
                 id: row
                 width: listView.width
                 height: 80
 
                 Rectangle {
                     id: imageArea
-                    height: parent.height
-                    width: height
+                    height: 80
+                    width: 80
                     color: "yellow"
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
+                    anchors.top: row.top
+                    anchors.bottom: row.bottom
+                    anchors.left: row.left
                     anchors.bottomMargin: 10
                     anchors.topMargin: 10
                     radius: width/2
@@ -178,19 +179,19 @@ Rectangle {
                         sourceSize.height: 35
 
                         anchors.verticalCenter: imageArea.verticalCenter
+                        anchors.horizontalCenter: imageArea.horizontalCenter
                         source: "qrc:/UI/assets/images/hcl_logo_bluepng.png"
                     }
 
                 }
 
                 Rectangle {
-                    height: parent.height
-                    anchors {
-                        right: parent.right
-                        left: imageArea.right
-                    }
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
+                    width: row.width - imageArea.width
+                    height: row.height
+                    anchors.left: imageArea.right
+                    anchors.top: row.top
+                    anchors.bottom: row.bottom
+                    anchors.right: row.right
                     anchors.bottomMargin: 10
                     anchors.topMargin: 10
 

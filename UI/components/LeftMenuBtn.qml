@@ -23,7 +23,7 @@ Button{
         id: internal
 
         // MOUSE OVER AND CLICK CHANGE COLOR
-        property var dynamicColor: if(btnLeftMenu.down){
+        property color dynamicColor: if(btnLeftMenu.down){
                                       return btnLeftMenu.down ? btnColorClicked : btnColorDefault
                                    } else {
                                       return btnLeftMenu.hovered ? btnColorMouseOver : btnColorDefault

@@ -11,6 +11,9 @@
 #include <QMetaObject>
 #include <QMetaEnum>
 
+#include "Backend/FireStoreHandler/FireStoreHandler.h"
+#include "Backend/Model/User.h"
+
 class AuthHandler : public QObject
 {
     Q_OBJECT
@@ -42,17 +45,21 @@ public:
 
 public slots:
     void networkReplyReadyRead();
+    void networkReplyReadyReadData();
     void readDatabase();
     void errorHandle();
-    void successHandle();
-    void testCloudFireStore();
+    void successLogin(const User &userLogin);
+    void userLogout(User &userLogout);
+
+    void getUserDetail();
     void getAllUser();
 
-signals:
-    void signedInSuccess();
-    void signedUpSuccess();
-    void signInError();
-    void signUpError();
+public: signals:
+    void signedInSuccess(const User &user);
+    void getUserSuccess(const User &user);
+    void signedUpSuccess(const User &);
+    void signInError(const QString &errorMessage);
+    void signUpError(const QString &errorMessage);
 
 private:
     QString m_apiKey;
@@ -60,14 +67,22 @@ private:
     QString m_idToken;
     QString m_responeStatus;
     QString m_errorMessage;
-
+    User m_user;
+    //Network pointer
     QNetworkAccessManager *m_networkAccessManager;
     QNetworkReply *m_networkReply;
 
     void post(const QString &url, const QJsonDocument &payLoad );
+    void get(const QString &url);
     void parseRespone(const QByteArray &respone);
-    void handleResponeSuccess(QJsonObject &resObj);
-    void handleResponeError(QJsonObject &errorObject);
+    void parseResponeData(const QByteArray &respone);
+    void handleResponeSuccess(const QJsonObject &resObj);
+    void handleResponeError(const QJsonObject &errorObject);
+    void parseJsonObject(const QJsonObject &object);
+    void parseJsonArray(const QJsonArray &array);
+    void parseJsonNull(const QJsonArray &array);
+
+    FireStoreHandler fireStore;
 };
 
 #endif // AUTHHANDLER_H
